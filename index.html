@@ -72,11 +72,12 @@
 
         button {
             background: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
+            color: #FFFFFF;
             border: none;
             padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .loading-text {
@@ -122,16 +123,107 @@
         .welcome-text {
             font-size: 24px;
             margin: 20px 0;
-            color: var(--tg-theme-text-color);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            color: #FFFFFF;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .content-container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
             padding: 20px;
             border-radius: 15px;
             margin: 20px;
+        }
+
+        .main-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .main-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 280px;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .main-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #FFFFFF;
+            text-decoration: none;
+            font-size: 12px;
+            gap: 5px;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            text-align: center;
+            z-index: 1;
+            padding-bottom: 80px; /* Отступ для нижней навигации */
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .menu-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 280px;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .menu-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        .nav-item.active {
+            color: #FFD700;
         }
     </style>
 </head>
@@ -146,25 +238,97 @@
         </div>
     </div>
 
-    <div id="main">
+    <div id="homeScreen" class="screen">
         <div class="blur-background"></div>
         <img src="assets/logo.png" alt="Logo" class="header-logo">
         <div class="content-container">
             <div class="welcome-text">
                 Приветствуем, <span id="userName">Гость</span>!
             </div>
-            <button onclick="window.Telegram.WebApp.close()">Закрыть</button>
+            
+            <div class="main-buttons">
+                <button class="main-button">🪑 Забронировать стол</button>
+                <button class="main-button">💎 Программа лояльности</button>
+                <button class="main-button">💰 Чаевые</button>
+            </div>
         </div>
     </div>
+
+    <div id="menuScreen" class="screen">
+        <div class="blur-background"></div>
+        <img src="assets/logo.png" alt="Logo" class="header-logo">
+        <div class="content-container">
+            <div class="welcome-text">Меню</div>
+            <div class="menu-buttons">
+                <button class="menu-button">🥗 Холодные закуски</button>
+                <button class="menu-button">🥬 Салаты</button>
+                <button class="menu-button">🍲 Горячие закуски</button>
+                <button class="menu-button">🥩 Мангал</button>
+                <button class="menu-button">🍜 Супы</button>
+                <button class="menu-button">🍖 Горячие блюда</button>
+                <button class="menu-button">🍰 Десерты</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="infoScreen" class="screen">
+        <div class="blur-background"></div>
+        <img src="assets/logo.png" alt="Logo" class="header-logo">
+        <div class="content-container">
+            <div class="welcome-text">Информация</div>
+            <!-- Здесь будет информационный контент -->
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" data-screen="homeScreen">
+            <span class="nav-icon">🏠</span>
+            <span>Главная</span>
+        </a>
+        <a href="#" class="nav-item" data-screen="menuScreen">
+            <span class="nav-icon">📋</span>
+            <span>Меню</span>
+        </a>
+        <a href="#" class="nav-item" data-screen="infoScreen">
+            <span class="nav-icon">ℹ️</span>
+            <span>Информация</span>
+        </a>
+    </nav>
 
     <script>
         window.Telegram.WebApp.expand();
 
-        // Получаем имя пользователя из Telegram WebApp
         const tg = window.Telegram.WebApp;
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('userName').textContent = tg.initDataUnsafe.user.first_name;
+
+        async function registerUser() {
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const userData = {
+                    telegram_id: tg.initDataUnsafe.user.id,
+                    first_name: tg.initDataUnsafe.user.first_name,
+                    // Запрашиваем номер телефона через Telegram
+                    phone_number: null
+                };
+
+                try {
+                    const response = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(userData)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Registration failed');
+                    }
+                } catch (error) {
+                    console.error('Error registering user:', error);
+                }
+            }
         }
+
+        // Вызываем функцию при загрузке приложения
+        registerUser();
 
         // Создаем хинкали в случайных позициях
         function createKhinkali() {
@@ -185,10 +349,37 @@
         // Создаем хинкали каждые 500мс
         setInterval(createKhinkali, 500);
 
+        // Функция для переключения экранов
+        function showScreen(screenId) {
+            // Скрываем все экраны
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Показываем нужный экран
+            document.getElementById(screenId).classList.add('active');
+            
+            // Обновляем активную кнопку навигации
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.screen === screenId) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // Обработчики нажатий на навигацию
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                showScreen(item.dataset.screen);
+            });
+        });
+
         // Показываем основной контент после загрузки
         setTimeout(() => {
             document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('main').style.display = 'block';
+            showScreen('homeScreen');
         }, 3000);
     </script>
 </body>
