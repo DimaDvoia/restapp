@@ -1,8 +1,10 @@
 const express = require('express');
 const db = require('./db');
 const app = express();
+const path = require('path');
 
 app.use(express.json());
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 app.post('/api/register', async (req, res) => {
     try {
@@ -64,6 +66,47 @@ app.post('/api/update-phone', async (req, res) => {
     } catch (error) {
         console.error('Error in update-phone endpoint:', error);
         res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+});
+
+// Получить все категории меню
+app.get('/api/menu/categories', async (req, res) => {
+    try {
+        const categories = await db.query('SELECT * FROM menu_categories ORDER BY id');
+        res.json(categories.rows);
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Получить блюда по категории
+app.get('/api/menu/items/:categoryId', async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+        const items = await db.query(
+            'SELECT * FROM menu_items WHERE category_id = $1 AND is_available = true ORDER BY name',
+            [categoryId]
+        );
+        res.json(items.rows);
+    } catch (error) {
+        console.error('Error fetching menu items:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Добавить новое блюдо (для администратора)
+app.post('/api/menu/items', async (req, res) => {
+    try {
+        const { category_id, name, description, price, image_url } = req.body;
+        const newItem = await db.query(
+            'INSERT INTO menu_items (category_id, name, description, price, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [category_id, name, description, price, image_url]
+        );
+        res.json(newItem.rows[0]);
+    } catch (error) {
+        console.error('Error adding menu item:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 

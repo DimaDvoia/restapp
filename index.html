@@ -225,6 +225,62 @@
         .nav-item.active {
             color: #FFD700;
         }
+
+        .menu-items {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .menu-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .menu-item-content {
+            padding: 15px;
+        }
+
+        .menu-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .menu-item h3 {
+            margin: 10px 0;
+            color: #FFFFFF;
+        }
+
+        .menu-item p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .menu-item .price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .back-button {
+            margin: 10px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -259,15 +315,7 @@
         <img src="assets/logo.png" alt="Logo" class="header-logo">
         <div class="content-container">
             <div class="welcome-text">Меню</div>
-            <div class="menu-buttons">
-                <button class="menu-button">🥗 Холодные закуски</button>
-                <button class="menu-button">🥬 Салаты</button>
-                <button class="menu-button">🍲 Горячие закуски</button>
-                <button class="menu-button">🥩 Мангал</button>
-                <button class="menu-button">🍜 Супы</button>
-                <button class="menu-button">🍖 Горячие блюда</button>
-                <button class="menu-button">🍰 Десерты</button>
-            </div>
+            <div class="menu-buttons"></div>
         </div>
     </div>
 
@@ -376,11 +424,88 @@
             });
         });
 
+        // Получаем и устанавливаем имя пользователя при загрузке
+        function setUserName() {
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                const userName = tg.initDataUnsafe.user.first_name;
+                document.getElementById('userName').textContent = userName;
+            }
+        }
+
         // Показываем основной контент после загрузки
         setTimeout(() => {
             document.getElementById('loadingScreen').style.display = 'none';
             showScreen('homeScreen');
+            setUserName();
         }, 3000);
+
+        async function loadMenuCategories() {
+            try {
+                const response = await fetch('/api/menu/categories');
+                const categories = await response.json();
+                const menuButtons = document.querySelector('.menu-buttons');
+                menuButtons.innerHTML = ''; // Очищаем существующие кнопки
+
+                categories.forEach(category => {
+                    const button = document.createElement('button');
+                    button.className = 'menu-button';
+                    button.innerHTML = `${category.icon} ${category.name}`;
+                    button.onclick = () => showMenuItems(category.id);
+                    menuButtons.appendChild(button);
+                });
+            } catch (error) {
+                console.error('Error loading menu categories:', error);
+            }
+        }
+
+        async function showMenuItems(categoryId) {
+            try {
+                const response = await fetch(`/api/menu/items/${categoryId}`);
+                const items = await response.json();
+                
+                // Создаем новый экран для отображения блюд
+                const menuItemsScreen = document.getElementById('menuItemsScreen') || createMenuItemsScreen();
+                const itemsContainer = menuItemsScreen.querySelector('.menu-items');
+                itemsContainer.innerHTML = '';
+
+                items.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'menu-item';
+                    itemElement.innerHTML = `
+                        <div class="menu-item-content">
+                            ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}">` : ''}
+                            <h3>${item.name}</h3>
+                            <p>${item.description || ''}</p>
+                            <div class="price">${item.price} ₽</div>
+                        </div>
+                    `;
+                    itemsContainer.appendChild(itemElement);
+                });
+
+                showScreen('menuItemsScreen');
+            } catch (error) {
+                console.error('Error loading menu items:', error);
+            }
+        }
+
+        function createMenuItemsScreen() {
+            const screen = document.createElement('div');
+            screen.id = 'menuItemsScreen';
+            screen.className = 'screen';
+            screen.innerHTML = `
+                <div class="blur-background"></div>
+                <img src="assets/logo.png" alt="Logo" class="header-logo">
+                <div class="content-container">
+                    <button class="back-button" onclick="showScreen('menuScreen')">← Назад</button>
+                    <div class="menu-items"></div>
+                </div>
+            `;
+            document.body.appendChild(screen);
+            return screen;
+        }
+
+        // Добавим вызов загрузки категорий при открытии экрана меню
+        document.querySelector('[data-screen="menuScreen"]').addEventListener('click', loadMenuCategories);
     </script>
 </body>
 </html> 

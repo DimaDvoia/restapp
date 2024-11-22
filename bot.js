@@ -1,6 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const WEBAPP_URL = process.env.WEBAPP_URL || 'https://dimadvoia.github.io/restapp/';
