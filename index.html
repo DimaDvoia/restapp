@@ -304,7 +304,7 @@
             
             <div class="main-buttons">
                 <button class="main-button">🪑 Забронировать стол</button>
-                <button class="main-button">💎 Программа лояльности</button>
+                <button class="main-button">💎 Программа лоялности</button>
                 <button class="main-button">💰 Чаевые</button>
             </div>
         </div>
@@ -399,15 +399,17 @@
 
         // Функция для переключения экранов
         function showScreen(screenId) {
-            // Скрываем все экраны
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
             });
             
-            // Показываем нужный экран
             document.getElementById(screenId).classList.add('active');
             
-            // Обновляем активную кнопку навигации
+            // Загружаем категории при открытии экрана меню
+            if (screenId === 'menuScreen') {
+                loadMenuCategories();
+            }
+            
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
                 if (item.dataset.screen === screenId) {
@@ -441,10 +443,18 @@
 
         async function loadMenuCategories() {
             try {
+                console.log('Загрузка категорий...');
                 const response = await fetch('/api/menu/categories');
                 const categories = await response.json();
+                console.log('Полученные категории:', categories);
+                
                 const menuButtons = document.querySelector('.menu-buttons');
-                menuButtons.innerHTML = ''; // Очищаем существующие кнопки
+                menuButtons.innerHTML = '';
+
+                if (categories.length === 0) {
+                    menuButtons.innerHTML = '<p style="color: white;">Категории меню пока не добавлены</p>';
+                    return;
+                }
 
                 categories.forEach(category => {
                     const button = document.createElement('button');
@@ -454,7 +464,9 @@
                     menuButtons.appendChild(button);
                 });
             } catch (error) {
-                console.error('Error loading menu categories:', error);
+                console.error('Ошибка загрузки категорий:', error);
+                const menuButtons = document.querySelector('.menu-buttons');
+                menuButtons.innerHTML = '<p style="color: white;">Ошибка загрузки меню</p>';
             }
         }
 
@@ -503,9 +515,6 @@
             document.body.appendChild(screen);
             return screen;
         }
-
-        // Добавим вызов загрузки категорий при открытии экрана меню
-        document.querySelector('[data-screen="menuScreen"]').addEventListener('click', loadMenuCategories);
     </script>
 </body>
 </html> 
