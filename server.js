@@ -30,6 +30,32 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
+// Endpoint для обновления номера телефона
+app.post('/api/update-phone', async (req, res) => {
+    try {
+        const { telegram_id, phone_number } = req.body;
+
+        const updatedUser = await db.query(
+            'UPDATE users SET phone_number = $1 WHERE telegram_id = $2 RETURNING *',
+            [phone_number, telegram_id]
+        );
+
+        if (updatedUser.rows.length === 0) {
+            // Если пользователь не найден, создаем нового
+            const newUser = await db.query(
+                'INSERT INTO users (telegram_id, phone_number) VALUES ($1, $2) RETURNING *',
+                [telegram_id, phone_number]
+            );
+            res.json(newUser.rows[0]);
+        } else {
+            res.json(updatedUser.rows[0]);
+        }
+    } catch (error) {
+        console.error('Error in update-phone endpoint:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
