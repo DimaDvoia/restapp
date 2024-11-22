@@ -89,14 +89,28 @@ app.post('/api/update-phone', async (req, res) => {
     }
 });
 
-// Получить все категории меню
+// Обновляем endpoint для получения категорий
 app.get('/api/menu/categories', async (req, res) => {
     try {
+        console.log('Запрос категорий меню...');
+        // Устанавливаем правильные заголовки
+        res.setHeader('Content-Type', 'application/json');
+        
         const categories = await db.query('SELECT * FROM menu_categories ORDER BY id');
+        console.log('Полученные категории:', categories.rows);
+        
+        if (!categories.rows || categories.rows.length === 0) {
+            console.log('Категории не найдены');
+            return res.status(404).json({ error: 'Категории не найдены' });
+        }
+        
         res.json(categories.rows);
     } catch (error) {
-        console.error('Error fetching categories:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Ошибка при получении категорий:', error);
+        res.status(500).json({ 
+            error: 'Internal server error',
+            details: error.message 
+        });
     }
 });
 

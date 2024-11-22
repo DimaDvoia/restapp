@@ -304,7 +304,7 @@
             
             <div class="main-buttons">
                 <button class="main-button">🪑 Забронировать стол</button>
-                <button class="main-button">💎 Программа лоялности</button>
+                <button class="main-button">💎 Программа лоял��ости</button>
                 <button class="main-button">💰 Чаевые</button>
             </div>
         </div>
@@ -344,9 +344,24 @@
     </nav>
 
     <script>
-        window.Telegram.WebApp.expand();
-
-        const tg = window.Telegram.WebApp;
+        // Проверяем, что Telegram WebApp инициализирован
+        if (!window.Telegram || !window.Telegram.WebApp) {
+            console.error('Telegram WebApp не инициализирован');
+            document.querySelector('.menu-buttons').innerHTML = 
+                '<p style="color: white;">Ошибка инициализации приложения</p>';
+        } else {
+            window.Telegram.WebApp.expand();
+            
+            const tg = window.Telegram.WebApp;
+            console.log('Telegram WebApp данные:', tg.initData);
+            
+            // Проверяем валидность initData
+            if (!tg.initData) {
+                console.error('Отсутствуют данные инициализации');
+                document.querySelector('.menu-buttons').innerHTML = 
+                    '<p style="color: white;">Ошибка: приложение должно быть открыто из Telegram</p>';
+            }
+        }
 
         async function registerUser() {
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
@@ -443,16 +458,25 @@
 
         async function loadMenuCategories() {
             try {
-                console.log('Загрузка категорий...');
+                console.log('Начало загрузки категорий...');
+                const menuButtons = document.querySelector('.menu-buttons');
+                menuButtons.innerHTML = '<p style="color: white;">Загрузка меню...</p>';
+
                 const response = await fetch('/api/menu/categories');
+                console.log('Ответ сервера:', response.status);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Ошибка загрузки категорий');
+                }
+
                 const categories = await response.json();
                 console.log('Полученные категории:', categories);
                 
-                const menuButtons = document.querySelector('.menu-buttons');
                 menuButtons.innerHTML = '';
 
-                if (categories.length === 0) {
-                    menuButtons.innerHTML = '<p style="color: white;">Категории меню пока не добавлены</p>';
+                if (!categories || categories.length === 0) {
+                    menuButtons.innerHTML = '<p style="color: white;">Меню пока недоступно</p>';
                     return;
                 }
 
@@ -466,7 +490,7 @@
             } catch (error) {
                 console.error('Ошибка загрузки категорий:', error);
                 const menuButtons = document.querySelector('.menu-buttons');
-                menuButtons.innerHTML = '<p style="color: white;">Ошибка загрузки меню</p>';
+                menuButtons.innerHTML = `<p style="color: white;">Ошибка загрузки меню: ${error.message}</p>`;
             }
         }
 
