@@ -13,6 +13,61 @@
             align-items: center;
             font-size: 18px;
             padding: 20px;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--tg-theme-bg-color);
+            z-index: 1000;
+        }
+
+        .logo {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .animation-container {
+            width: 100%;
+            height: 100px;
+            position: relative;
+            overflow: visible;
+            margin: 0 auto;
+        }
+
+        .khinkali {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            animation: fallKhinkali 3s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes fallKhinkali {
+            0% {
+                transform: translateY(-50px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(200px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        #main {
+            display: none;
         }
 
         button {
@@ -23,9 +78,35 @@
             border-radius: 8px;
             cursor: pointer;
         }
+
+        .loading-text {
+            font-size: 24px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .dot {
+            animation: dotAnimation 1s infinite;
+        }
+
+        @keyframes dotAnimation {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
+    <div class="loading-screen" id="loadingScreen">
+        <img src="assets/logo.png" alt="Logo" class="logo">
+        <div class="loading-text">
+            Загрузка<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+        </div>
+        <div class="animation-container" id="khinkaliContainer">
+            <!-- Убрали барашка -->
+        </div>
+    </div>
+
     <div id="main">
         <h1>Моё мини-приложение</h1>
         <button onclick="window.Telegram.WebApp.close()">Закрыть</button>
@@ -33,6 +114,31 @@
 
     <script>
         window.Telegram.WebApp.expand();
+
+        // Создаем хинкали в случайных позициях
+        function createKhinkali() {
+            const container = document.getElementById('khinkaliContainer');
+            const khinkali = document.createElement('img');
+            khinkali.src = 'assets/khinkali.png';
+            khinkali.className = 'khinkali';
+            // Случайная позиция по горизонтали
+            khinkali.style.left = Math.random() * (container.offsetWidth - 30) + 'px';
+            container.appendChild(khinkali);
+
+            // Удаляем хинкали после анимации
+            setTimeout(() => {
+                khinkali.remove();
+            }, 3000);
+        }
+
+        // Создаем хинкали каждые 500мс
+        setInterval(createKhinkali, 500);
+
+        // Показываем основной контент после загрузки
+        setTimeout(() => {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('main').style.display = 'block';
+        }, 3000);
     </script>
 </body>
 </html> 
