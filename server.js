@@ -3,9 +3,19 @@ const db = require('./db');
 const app = express();
 const path = require('path');
 const multer = require('multer');
+const cors = require('cors');
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+// Добавьте CORS middleware
+app.use(cors());
+
+// Добавьте маршрут для index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // Добавьте маршрут для admin.html перед другими маршрутами
 app.get('/admin', (req, res) => {
@@ -142,6 +152,141 @@ app.post('/api/menu/items', upload.single('image'), async (req, res) => {
         res.json(newItem.rows[0]);
     } catch (error) {
         console.error('Error adding menu item:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Получение доступных столов
+app.post('/api/tables/available', async (req, res) => {
+    try {
+        const { date, time, guests } = req.body;
+        
+        // Получаем столы, подходящие по количеству гостей
+        const tables = await db.query(
+            `SELECT * FROM tables 
+             WHERE guests_number_min <= $1 
+             AND guests_number_max >= $1
+             ORDER BY stage, number`,
+            [guests]
+        );
+        
+        // Здесь можно добавить дополнительную логику проверки занятости столов
+        // на конкретную дату и время
+        
+        res.json(tables.rows);
+    } catch (error) {
+        console.error('Error fetching available tables:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Бронирование стола
+app.post('/api/tables/book', async (req, res) => {
+    try {
+        const { tableId, date, time, guests, occasion, userId } = req.body;
+        
+        // Здесь будет логика сохранения бронирования
+        // и проверки доступности стола
+        
+        res.json({ success: true, message: 'Стол успешно забронирован' });
+    } catch (error) {
+        console.error('Error booking table:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Проверка доступности столов
+app.post('/api/tables/check-availability', async (req, res) => {
+    try {
+        const { date, time, guests_count } = req.body;
+
+        // Получаем все столы, подходящие по количеству гостей
+        const availableTables = await db.query(
+            `SELECT * FROM tables 
+             WHERE guests_number_min <= $1 
+             AND guests_number_max >= $1 
+             AND is_active = true
+             AND id NOT IN (
+                 SELECT table_id FROM bookings 
+                 WHERE booking_date = $2 
+                 AND booking_time = $3 
+                 AND status != 'cancelled'
+             )
+             ORDER BY stage, number`,
+            [guests_count, date, time]
+        );
+
+        res.json(availableTables.rows);
+    } catch (error) {
+        console.error('Error checking table availability:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Создание бронирования
+app.post('/api/bookings', async (req, res) => {
+    try {
+        const { 
+            table_id, 
+            user_id, 
+            booking_date, 
+            booking_time, 
+            guests_count, 
+            occasion 
+        } = req.body;
+
+        const newBooking = await db.query(
+            `INSERT INTO bookings 
+             (table_id, user_id, booking_date, booking_time, guests_count, occasion)
+             VALUES ($1, $2, $3, $4, $5, $6)
+             RETURNING *`,
+            [table_id, user_id, booking_date, booking_time, guests_count, occasion]
+        );
+
+        res.json(newBooking.rows[0]);
+    } catch (error) {
+        console.error('Error creating booking:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Получение бронирований пользователя
+app.get('/api/bookings/user/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        const bookings = await db.query(
+            `SELECT b.*, t.number as table_number, t.stage
+             FROM bookings b
+             JOIN tables t ON b.table_id = t.id
+             WHERE b.user_id = $1
+             ORDER BY b.booking_date DESC, b.booking_time DESC`,
+            [userId]
+        );
+
+        res.json(bookings.rows);
+    } catch (error) {
+        console.error('Error fetching user bookings:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Отмена бронирования
+app.post('/api/bookings/:id/cancel', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const cancelledBooking = await db.query(
+            `UPDATE bookings 
+             SET status = 'cancelled'
+             WHERE id = $1
+             RETURNING *`,
+            [id]
+        );
+
+        res.json(cancelledBooking.rows[0]);
+    } catch (error) {
+        console.error('Error cancelling booking:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

@@ -3,7 +3,7 @@ require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const WEBAPP_URL = process.env.WEBAPP_URL || 'https://dimadvoia.github.io/restapp/';
+const WEBAPP_URL = 'http://localhost:3000';
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
@@ -14,19 +14,19 @@ bot.onText(/\/start/, async (msg) => {
     
     const keyboard = {
         reply_markup: {
+            inline_keyboard: [[
+                {
+                    text: '🚀 Открыть приложение',
+                    web_app: { url: WEBAPP_URL }
+                }
+            ]],
             keyboard: [[
                 {
                     text: '📱 Поделиться номером телефона',
                     request_contact: true
                 }
             ]],
-            resize_keyboard: true,
-            inline_keyboard: [[
-                {
-                    text: '🚀 Открыть приложение',
-                    web_app: { url: WEBAPP_URL }
-                }
-            ]]
+            resize_keyboard: true
         }
     };
     
@@ -89,5 +89,21 @@ bot.on('contact', async (msg) => {
         await bot.sendMessage(chatId, 'Произошла ошибка при сохранении номера телефона. Пожалуйста, попробуйте позже.');
     }
 });
+
+async function sendBookingNotification(chatId, bookingDetails) {
+    const message = `
+🎉 Бронирование подтверждено!
+
+📅 Дата: ${bookingDetails.booking_date}
+⏰ Время: ${bookingDetails.booking_time}
+👥 Гости: ${bookingDetails.guests_count}
+🪑 Стол: ${bookingDetails.table_number}
+📍 Этаж: ${bookingDetails.stage}
+
+Ждем вас в гости!
+`;
+
+    await bot.sendMessage(chatId, message);
+}
 
 console.log('Бот успешно запущен! 🚀'); 

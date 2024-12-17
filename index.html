@@ -281,6 +281,82 @@
             color: white;
             cursor: pointer;
         }
+
+        .booking-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .table-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .table-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .table-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .table-info {
+            padding: 15px;
+            color: white;
+        }
+
+        .table-info h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .table-info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .book-table-btn {
+            width: 100%;
+            padding: 10px;
+            background: var(--tg-theme-button-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -304,7 +380,7 @@
             
             <div class="main-buttons">
                 <button class="main-button">🪑 Забронировать стол</button>
-                <button class="main-button">💎 Программа лоял��ости</button>
+                <button class="main-button">💎 Программа лоялости</button>
                 <button class="main-button">💰 Чаевые</button>
             </div>
         </div>
@@ -328,6 +404,47 @@
         </div>
     </div>
 
+    <div id="bookingScreen" class="screen">
+        <div class="blur-background"></div>
+        <img src="assets/logo.png" alt="Logo" class="header-logo">
+        <div class="content-container">
+            <button class="back-button" onclick="showScreen('homeScreen')">← Назад</button>
+            <div class="welcome-text">Бронирование стола</div>
+            <form id="bookingForm" class="booking-form">
+                <div class="form-group">
+                    <label>Дата</label>
+                    <input type="date" id="bookingDate" required min="">
+                </div>
+                
+                <div class="form-group">
+                    <label>Время</label>
+                    <input type="time" id="bookingTime" required min="12:30" max="23:30" step="1800">
+                </div>
+                
+                <div class="form-group">
+                    <label>Количество гостей</label>
+                    <input type="number" id="guestsCount" required min="1" max="22">
+                </div>
+                
+                <div class="form-group">
+                    <label>Повод для посещения</label>
+                    <select id="occasion" required>
+                        <option value="">Выберите повод</option>
+                        <option value="dinner">Ужин</option>
+                        <option value="birthday">День рождения</option>
+                        <option value="anniversary">Годовщина</option>
+                        <option value="business">Деловая встреча</option>
+                        <option value="other">Другое</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="main-button">Найти свободные столы</button>
+            </form>
+            
+            <div id="availableTables" class="tables-grid"></div>
+        </div>
+    </div>
+
     <nav class="bottom-nav">
         <a href="#" class="nav-item active" data-screen="homeScreen">
             <span class="nav-icon">🏠</span>
@@ -344,24 +461,29 @@
     </nav>
 
     <script>
-        // Проверяем, что Telegram WebApp инициализирован
-        if (!window.Telegram || !window.Telegram.WebApp) {
-            console.error('Telegram WebApp не инициализирован');
-            document.querySelector('.menu-buttons').innerHTML = 
-                '<p style="color: white;">Ошибка инициализации приложения</p>';
-        } else {
-            window.Telegram.WebApp.expand();
-            
-            const tg = window.Telegram.WebApp;
-            console.log('Telegram WebApp данные:', tg.initData);
-            
-            // Проверяем валидность initData
-            if (!tg.initData) {
-                console.error('Отсутствуют данные инициализации');
-                document.querySelector('.menu-buttons').innerHTML = 
-                    '<p style="color: white;">Ошибка: приложение должно быть открыто из Telegram</p>';
+        let tg = null;
+
+        // Инициализация Telegram WebApp
+        function initTelegramWebApp() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.expand();
+                tg = window.Telegram.WebApp;
+                console.log('Telegram WebApp данные:', tg.initData);
+                
+                // После успешной инициализации загружаем данные пользователя
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                    setUserName();
+                    registerUser();
+                } else {
+                    console.error('Отсутствуют данные пользователя');
+                }
+            } else {
+                console.error('Telegram WebApp не инициализирован');
             }
         }
+
+        // Вызываем инициализацию при загрузке страницы
+        document.addEventListener('DOMContentLoaded', initTelegramWebApp);
 
         async function registerUser() {
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
@@ -389,9 +511,6 @@
                 }
             }
         }
-
-        // Вызываем функцию при загрузке приложения
-        registerUser();
 
         // Создаем хинкали в случайных позициях
         function createKhinkali() {
@@ -462,12 +581,11 @@
                 const menuButtons = document.querySelector('.menu-buttons');
                 menuButtons.innerHTML = '<p style="color: white;">Загрузка меню...</p>';
 
-                const response = await fetch('/api/menu/categories');
+                const response = await fetch('http://localhost:3000/api/menu/categories');
                 console.log('Ответ сервера:', response.status);
                 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Ошибка загрузки категорий');
+                    throw new Error('Ошибка загрузки категорий');
                 }
 
                 const categories = await response.json();
@@ -496,31 +614,46 @@
 
         async function showMenuItems(categoryId) {
             try {
-                const response = await fetch(`/api/menu/items/${categoryId}`);
+                console.log('Загрузка блюд для категории:', categoryId);
+                const response = await fetch(`http://localhost:3000/api/menu/items/${categoryId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки блюд');
+                }
+                
                 const items = await response.json();
+                console.log('Полученные блюда:', items);
                 
                 // Создаем новый экран для отображения блюд
                 const menuItemsScreen = document.getElementById('menuItemsScreen') || createMenuItemsScreen();
                 const itemsContainer = menuItemsScreen.querySelector('.menu-items');
                 itemsContainer.innerHTML = '';
 
-                items.forEach(item => {
-                    const itemElement = document.createElement('div');
-                    itemElement.className = 'menu-item';
-                    itemElement.innerHTML = `
-                        <div class="menu-item-content">
-                            ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}">` : ''}
-                            <h3>${item.name}</h3>
-                            <p>${item.description || ''}</p>
-                            <div class="price">${item.price} ₽</div>
-                        </div>
-                    `;
-                    itemsContainer.appendChild(itemElement);
-                });
+                if (items.length === 0) {
+                    itemsContainer.innerHTML = '<p style="color: white; text-align: center;">В этой категории пока нет блюд</p>';
+                } else {
+                    items.forEach(item => {
+                        const itemElement = document.createElement('div');
+                        itemElement.className = 'menu-item';
+                        itemElement.innerHTML = `
+                            <div class="menu-item-content">
+                                ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}" onerror="this.src='assets/logo.png'">` : ''}
+                                <h3>${item.name}</h3>
+                                <p>${item.description || ''}</p>
+                                <div class="price">${item.price} ₽</div>
+                            </div>
+                        `;
+                        itemsContainer.appendChild(itemElement);
+                    });
+                }
 
                 showScreen('menuItemsScreen');
             } catch (error) {
-                console.error('Error loading menu items:', error);
+                console.error('Ошибка загрузки блюд:', error);
+                const menuItemsScreen = document.getElementById('menuItemsScreen') || createMenuItemsScreen();
+                const itemsContainer = menuItemsScreen.querySelector('.menu-items');
+                itemsContainer.innerHTML = `<p style="color: white; text-align: center;">Ошибка загрузки блюд: ${error.message}</p>`;
+                showScreen('menuItemsScreen');
             }
         }
 
@@ -538,6 +671,84 @@
             `;
             document.body.appendChild(screen);
             return screen;
+        }
+
+        // В начале скрипта добавьте обработчик для кнопки бронирования
+        document.querySelector('.main-button').addEventListener('click', (e) => {
+            if (e.target.textContent.includes('Забронировать стол')) {
+                showScreen('bookingScreen');
+                initBookingForm();
+            }
+        });
+
+        function initBookingForm() {
+            // Установка минимальной даты (сегодня)
+            const dateInput = document.getElementById('bookingDate');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+            
+            // Обработчик формы
+            document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = {
+                    date: document.getElementById('bookingDate').value,
+                    time: document.getElementById('bookingTime').value,
+                    guests: document.getElementById('guestsCount').value,
+                    occasion: document.getElementById('occasion').value
+                };
+                
+                try {
+                    const response = await fetch(`http://localhost:3000/api/tables/available`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    if (!response.ok) throw new Error('Ошибка получения столов');
+                    
+                    const tables = await response.json();
+                    displayAvailableTables(tables);
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    document.getElementById('availableTables').innerHTML = 
+                        '<p style="color: white; text-align: center;">Ошибка при поиске столов</p>';
+                }
+            });
+        }
+
+        function displayAvailableTables(tables) {
+            const container = document.getElementById('availableTables');
+            container.innerHTML = '';
+            
+            if (tables.length === 0) {
+                container.innerHTML = '<p style="color: white; text-align: center;">Нет доступных столов на выбранное время</p>';
+                return;
+            }
+            
+            tables.forEach(table => {
+                const tableCard = document.createElement('div');
+                tableCard.className = 'table-card';
+                tableCard.innerHTML = `
+                    <img src="${table.image_url}" alt="Стол ${table.number}" class="table-image">
+                    <div class="table-info">
+                        <h3>Стол ${table.number}</h3>
+                        <p>Этаж: ${table.stage}</p>
+                        <p>Вместимость: ${table.guests_number_min} - ${table.guests_number_max} гостей</p>
+                        <button class="book-table-btn" onclick="bookTable(${table.id})">
+                            Забронировать
+                        </button>
+                    </div>
+                `;
+                container.appendChild(tableCard);
+            });
+        }
+
+        async function bookTable(tableId) {
+            // Здесь будет логика бронирования стола
+            console.log('Бронирование стола:', tableId);
         }
     </script>
 </body>
