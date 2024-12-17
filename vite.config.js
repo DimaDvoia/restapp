@@ -1,4 +1,13 @@
+import { defineConfig } from 'vite'
+
 export default defineConfig({
-  base: '',
-  // остальные настройки...
+  base: '/restapp/',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+  },
+  server: {
+    port: 3000,
+    host: true
+  }
 }) 
