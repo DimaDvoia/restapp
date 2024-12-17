@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Telegram WebApp</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Telegram WebApp</title>
     <style>
         body {
             color: var(--tg-theme-text-color);
@@ -470,7 +471,7 @@
                 tg = window.Telegram.WebApp;
                 console.log('Telegram WebApp данные:', tg.initData);
                 
-                // После успешной инициализации загружаем данные пользователя
+                // После успешной инициализаци�� загружаем данные пользователя
                 if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
                     setUserName();
                     registerUser();
@@ -568,7 +569,7 @@
             }
         }
 
-        // Показываем основной контент после загрузки
+        // Показыв��ем основной контент после загрузки
         setTimeout(() => {
             document.getElementById('loadingScreen').style.display = 'none';
             showScreen('homeScreen');
@@ -624,7 +625,7 @@
                 const items = await response.json();
                 console.log('Полученные блюда:', items);
                 
-                // Создаем новый экран для отображения блюд
+                // Создаем н��вый экран для отображения блюд
                 const menuItemsScreen = document.getElementById('menuItemsScreen') || createMenuItemsScreen();
                 const itemsContainer = menuItemsScreen.querySelector('.menu-items');
                 itemsContainer.innerHTML = '';
@@ -751,5 +752,6 @@
             console.log('Бронирование стола:', tableId);
         }
     </script>
+    <script type="module" src="/src/main.js"></script>
 </body>
 </html> 
