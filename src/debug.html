@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Test</h1>
+    <div id="result"></div>
+    <script>
+        async function testAPI() {
+            const result = document.getElementById('result');
+            try {
+                const response = await fetch('http://localhost:3000/api/menu/categories');
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+            }
+        }
+        testAPI();
+    </script>
+</body>
+</html> 
