@@ -461,7 +461,7 @@
         </a>
     </nav>
 
-    <script>
+    <script type="module">
         let tg = null;
 
         // Инициализация Telegram WebApp
@@ -476,14 +476,8 @@
                     console.log('Platform:', tg.platform);
                     console.log('InitData:', tg.initData);
                     
-                    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                        console.log('Пользователь найден:', tg.initDataUnsafe.user);
-                        setUserName();
-                        registerUser();
-                    } else {
-                        console.log('Данные пользователя отсутствуют');
-                        console.error('Отсутствуют данные пользователя');
-                    }
+                    // Сразу показываем контент после успешной инициализации
+                    showMainContent();
                 } else {
                     throw new Error('Telegram WebApp не инициализирован');
                 }
@@ -493,6 +487,17 @@
                 errorDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;padding:10px;z-index:9999;';
                 errorDiv.textContent = `Ошибка: ${error.message}`;
                 document.body.appendChild(errorDiv);
+                // Показываем контент даже при ошибке
+                showMainContent();
+            }
+        }
+
+        // Выносим показ контента в отдельную функцию
+        function showMainContent() {
+            document.getElementById('loadingScreen').style.display = 'none';
+            showScreen('homeScreen');
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                setUserName();
             }
         }
 
@@ -547,23 +552,27 @@
 
         // Функция для переключения экранов
         function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            
-            document.getElementById(screenId).classList.add('active');
-            
-            // Загружаем категории при открытии экрана меню
-            if (screenId === 'menuScreen') {
-                loadMenuCategories();
-            }
-            
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.dataset.screen === screenId) {
-                    item.classList.add('active');
+            try {
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                
+                document.getElementById(screenId).classList.add('active');
+                
+                // Загружаем категории при открытии экрана меню
+                if (screenId === 'menuScreen') {
+                    loadMenuCategories();
                 }
-            });
+                
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.screen === screenId) {
+                        item.classList.add('active');
+                    }
+                });
+            } catch (error) {
+                console.error('Ошибка при переключении экрана:', error);
+            }
         }
 
         // Обработчики нажатий на навигацию
@@ -576,30 +585,28 @@
 
         // Получаем и устанавливаем имя пользователя при загрузке
         function setUserName() {
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                const userName = tg.initDataUnsafe.user.first_name;
-                document.getElementById('userName').textContent = userName;
+            try {
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                    const userName = tg.initDataUnsafe.user.first_name;
+                    document.getElementById('userName').textContent = userName;
+                }
+            } catch (error) {
+                console.error('Ошибка при установке имен пользователя:', error);
+                document.getElementById('userName').textContent = 'Гость';
             }
         }
-
-        // Показывем основной контент после загрузки
-        setTimeout(() => {
-            document.getElementById('loadingScreen').style.display = 'none';
-            showScreen('homeScreen');
-            setUserName();
-        }, 3000);
 
         async function loadMenuCategories() {
             try {
                 console.log('Начало загрузки категорий...');
-                console.log('URL запроса:', import.meta.env.VITE_API_URL);
                 const menuButtons = document.querySelector('.menu-buttons');
                 menuButtons.innerHTML = '<p style="color: white;">Загрузка меню...</p>';
 
-                const response = await fetch('http://localhost:3000/api/menu/categories');
+                const apiUrl = 'http://localhost:3000';
+                const response = await fetch(`${apiUrl}/api/menu/categories`);
                 console.log('Статус ответа:', response.status);
-                console.log('Заголовки ответа:', Object.fromEntries(response.headers));
-                
+                console.log('URL запроса:', `${apiUrl}/api/menu/categories`);
+
                 if (!response.ok) {
                     throw new Error('Ошибка загрузки категорий');
                 }
@@ -610,7 +617,7 @@
                 menuButtons.innerHTML = '';
 
                 if (!categories || categories.length === 0) {
-                    menuButtons.innerHTML = '<p style="color: white;">Меню пока недоступно</p>';
+                    menuButtons.innerHTML = '<p style="color: white;">Меню пока не оступно</p>';
                     return;
                 }
 
@@ -631,7 +638,8 @@
         async function showMenuItems(categoryId) {
             try {
                 console.log('Загрузка блюд для категории:', categoryId);
-                const response = await fetch(`http://localhost:3000/api/menu/items/${categoryId}`);
+                const apiUrl = 'http://localhost:3000';
+                const response = await fetch(`${apiUrl}/api/menu/items/${categoryId}`);
                 
                 if (!response.ok) {
                     throw new Error('Ошибка загрузки блюд');
@@ -689,12 +697,14 @@
             return screen;
         }
 
-        // В начале скрипта добавьте обработчик для кнопки бронирования
-        document.querySelector('.main-button').addEventListener('click', (e) => {
-            if (e.target.textContent.includes('Забронировать стол')) {
-                showScreen('bookingScreen');
-                initBookingForm();
-            }
+        // В начале скрипта добавьте обработчик для кнпки бронирования
+        document.querySelectorAll('.main-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                if (e.target.textContent.includes('Забронировать стол')) {
+                    showScreen('bookingScreen');
+                    initBookingForm();
+                }
+            });
         });
 
         function initBookingForm() {
@@ -767,6 +777,6 @@
             console.log('Бронирование стола:', tableId);
         }
     </script>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="./src/main.js"></script>
 </body>
 </html> 
