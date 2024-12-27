@@ -9,9 +9,7 @@
         const APP_VERSION = '1.0.0';
         
         // API URL
-        window.API_URL = window.location.protocol === 'https:' 
-          ? 'https://restapp-api.onrender.com'
-          : 'http://restapp-api.onrender.com';
+        window.API_URL = 'https://restapp-api.onrender.com';
         
         // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
@@ -495,7 +493,7 @@
         <img src="assets/logo.png" alt="Logo" class="header-logo">
         <div class="content-container">
             <div class="welcome-text">Информация</div>
-            <!-- Здесь будет информ��ционный контент -->
+            <!-- Здесь будет информационный контент -->
         </div>
     </div>
 
@@ -644,7 +642,7 @@
         // Создаем хинкали каждые 500мс
         setInterval(createKhinkali, 500);
 
-        // Функция для переключения эк��анов
+        // Функция для переключения экранов
         function showScreen(screenId) {
             try {
                 document.querySelectorAll('.screen').forEach(screen => {
@@ -677,7 +675,7 @@
             });
         });
 
-        // Получаем и устанавлива��м имя пользователя при загрузке
+        // Получаем и уста��авливаем имя пользователя при загрузке
         function setUserName() {
             try {
                 if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
