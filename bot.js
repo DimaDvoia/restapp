@@ -3,7 +3,6 @@ require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const WEBAPP_URL = 'https://dimadvoia.github.io/restapp/';
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
@@ -13,7 +12,7 @@ const webAppUrl = 'https://dimadvoia.github.io/restapp/';
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, 'Добро пожаловать!', {
         reply_markup: {
-            keyboard: [[{ text: 'Открыть приложение', web_app: { url: webAppUrl } }]],
+            keyboard: [[{ text: 'Открыть приложение', web_app: { url: 'https://dimadvoia.github.io/restapp/' } }]],
             resize_keyboard: true
         }
     });
@@ -41,7 +40,7 @@ bot.on('contact', async (msg) => {
         });
 
         if (response.ok) {
-            // Отправляем новое соо��щение с кнопкой приложения
+            // Отправляем новое сообщение с кнопкой приложения
             const newKeyboard = {
                 reply_markup: {
                     inline_keyboard: [[
