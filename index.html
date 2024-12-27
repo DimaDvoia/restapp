@@ -629,7 +629,7 @@
             const khinkali = document.createElement('img');
             khinkali.src = 'assets/khinkali.png';
             khinkali.className = 'khinkali';
-            // Случайн��я позиция по горизонтали
+            // Случайная позиция по горизонтали
             khinkali.style.left = Math.random() * (container.offsetWidth - 30) + 'px';
             container.appendChild(khinkali);
 
@@ -694,17 +694,16 @@
                 const menuButtons = document.querySelector('.menu-buttons');
                 menuButtons.innerHTML = '<p style="color: white;">Загрузка меню...</p>';
 
-                // Пробуем "разбудить" сервер
-                try {
-                    await fetch(`${window.API_URL}/ping`);
-                    console.log('Server awakened');
-                } catch (e) {
-                    console.log('Waking up server...');
-                    // Ждем 5 секунд
-                    await new Promise(resolve => setTimeout(resolve, 5000));
-                }
+                const apiUrl = 'https://restapp-api.onrender.com';
+                console.log('Using API URL:', apiUrl);
 
-                const response = await fetch(`${window.API_URL}/api/menu/categories`);
+                const response = await fetch(`${apiUrl}/api/menu/categories`, {
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
                 console.log('Response status:', response.status);
                 console.log('Response headers:', response.headers);
                 const categories = await response.json();
