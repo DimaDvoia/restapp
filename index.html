@@ -620,7 +620,7 @@
             khinkali.style.left = Math.random() * (container.offsetWidth - 30) + 'px';
             container.appendChild(khinkali);
 
-            // Удаляем хинкали после анимаци��
+            // Удаляем хинкали после анимации
             setTimeout(() => {
                 khinkali.remove();
             }, 3000);
@@ -681,52 +681,24 @@
                 const menuButtons = document.querySelector('.menu-buttons');
                 menuButtons.innerHTML = '<p style="color: white;">Загрузка меню...</p>';
 
-                const apiUrl = window.API_URL;
-                console.log('Using API URL:', apiUrl);
-
-                // Добавляем timestamp для предотвращения кэширования
-                const timestamp = new Date().getTime();
-                const url = `${apiUrl}/api/menu/categories?_=${timestamp}`;
-                
-                // Показываем сообщение о начале загрузки
-                tg.showAlert('Загрузка меню...');
-                
-                const response = await fetch(url, {
-                    method: 'GET',
-                    mode: 'cors',
-                    cache: 'no-cache',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Cache-Control': 'no-cache'
-                    }
-                });
-                
-                console.log('Response status:', response.status);
-                console.log('Response headers:', Object.fromEntries(response.headers));
-
-                if (!response.ok) {
-                    tg.showAlert('Ошибка загрузки: ' + response.status);
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
+                const response = await fetch(`${API_URL}/api/menu/categories`);
                 const categories = await response.json();
-                console.log('Categories loaded:', categories);
-                tg.showAlert('Меню загружено: ' + categories.length + ' категорий');
-                
+
+                // Очищаем контейнер перед добавлением кнопок
                 menuButtons.innerHTML = '';
-
-                if (!categories || categories.length === 0) {
-                    menuButtons.innerHTML = '<p style="color: white;">Меню пока еще не оступно</p>';
-                    return;
+                
+                // Проверяем, что categories это массив
+                if (Array.isArray(categories)) {
+                    categories.forEach(category => {
+                        const button = document.createElement('button');
+                        button.className = 'menu-button';
+                        button.onclick = () => showMenuItems(category.id);
+                        button.innerHTML = `${category.icon} ${category.name}`;
+                        menuButtons.appendChild(button);
+                    });
+                } else {
+                    throw new Error('Неверный формат данных');
                 }
-
-                categories.forEach(category => {
-                    const button = document.createElement('button');
-                    button.className = 'menu-button';
-                    button.innerHTML = `${category.icon} ${category.name}`;
-                    button.onclick = () => showMenuItems(category.id);
-                    menuButtons.appendChild(button);
-                });
             } catch (error) {
                 console.error('Ошибка загрузки категорий:', error);
                 const menuButtons = document.querySelector('.menu-buttons');
