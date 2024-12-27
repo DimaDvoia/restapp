@@ -9,7 +9,7 @@
         const APP_VERSION = '1.0.0';
         
         // API URL
-        window.API_URL = 'https://restapp-api.onrender.com';
+        const API_BASE_URL = 'https://restapp-api.onrender.com';
         
         // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
@@ -26,14 +26,14 @@
           });
         }
         
-        // Сообщаем Telegram что приложение готово
+        // Сообщаем Telegram что приложени�� готово
         tg.ready();
         
         // Расширенное логирование
         console.log('=== Debug Info ===');
         console.log('Platform:', tg.platform);
         console.log('Version:', tg.version);
-        console.log('API URL:', window.API_URL);
+        console.log('API URL:', API_BASE_URL);
         
         // Функция для отправки ошибок в Telegram
         function logError(error) {
@@ -71,7 +71,7 @@
         // Пингуем сервер каждые 5 минут
         setInterval(async () => {
           try {
-            await fetch(`${window.API_URL}/ping`);
+            await fetch(`${API_BASE_URL}/ping`);
             console.log('Server pinged');
           } catch (error) {
             console.error('Ping failed:', error);
@@ -81,7 +81,7 @@
         // Функция проверки сервера
         async function checkServer() {
           try {
-            const response = await fetch(`${window.API_URL}/ping`);
+            const response = await fetch(`${API_BASE_URL}/ping`);
             if (!response.ok) {
               throw new Error(`Server error: ${response.status}`);
             }
@@ -694,10 +694,7 @@
                 const menuButtons = document.querySelector('.menu-buttons');
                 menuButtons.innerHTML = '<p style="color: white;">Загрузка меню...</p>';
 
-                const apiUrl = 'https://restapp-api.onrender.com';
-                console.log('Using API URL:', apiUrl);
-
-                const response = await fetch(`${apiUrl}/api/menu/categories`, {
+                const response = await fetch(`${API_BASE_URL}/api/menu/categories`, {
                     mode: 'cors',
                     headers: {
                         'Accept': 'application/json',
@@ -733,7 +730,7 @@
         async function showMenuItems(categoryId) {
             try {
                 console.log('Загрузка блюд для категории:', categoryId);
-                const apiUrl = window.API_URL;
+                const apiUrl = API_BASE_URL;
                 const response = await fetch(`${apiUrl}/api/menu/items/${categoryId}`);
                 
                 if (!response.ok) {
@@ -820,7 +817,7 @@
                 };
                 
                 try {
-                    const apiUrl = window.API_URL;
+                    const apiUrl = API_BASE_URL;
                     const response = await fetch(`${apiUrl}/api/tables/available`, {
                         method: 'POST',
                         headers: {
@@ -857,7 +854,7 @@
                     <img src="${table.image_url}" alt="Стол ${table.number}" class="table-image">
                     <div class="table-info">
                         <h3>Стол ${table.number}</h3>
-                        <p>Эта: ${table.stage}</p>
+                        <p>Э��а: ${table.stage}</p>
                         <p>Вместимость: ${table.guests_number_min} - ${table.guests_number_max} гостей</p>
                         <button class="book-table-btn" onclick="bookTable(${table.id})">
                             Забронировать
