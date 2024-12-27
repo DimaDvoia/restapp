@@ -6,20 +6,14 @@ const app = express();
 
 // Подключение к базе данных
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: 'baranzpp',
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
-// Добавим логирование для отладки
-console.log('Database connection config:', {
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: 'baranzpp',
-  port: process.env.DB_PORT
-});
+// Добавим логирование подключения
+console.log('Connecting to database...');
 
 app.use(cors());
 app.use(express.json());
