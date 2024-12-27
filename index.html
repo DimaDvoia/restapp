@@ -79,6 +79,21 @@
             console.error('Ping failed:', error);
           }
         }, 300000);
+
+        // Функция проверки сервера
+        async function checkServer() {
+          try {
+            const response = await fetch(`${window.API_URL}/ping`);
+            if (!response.ok) {
+              throw new Error(`Server error: ${response.status}`);
+            }
+            console.log('Server is alive');
+            return true;
+          } catch (error) {
+            console.error('Server check failed:', error);
+            return false;
+          }
+        }
     </script>
     <title>Telegram WebApp</title>
     <style>
@@ -509,7 +524,7 @@
                 <div class="form-group">
                     <label>Повод для посещения</label>
                     <select id="occasion" required>
-                        <option value="">Выберите повод</option>
+                        <option value="">Выберите ��овод</option>
                         <option value="dinner">Ужин</option>
                         <option value="birthday">День рождения</option>
                         <option value="anniversary">Годовщина</option>
@@ -677,11 +692,19 @@
 
         async function loadMenuCategories() {
             try {
+                // Проверяем сервер перед загрузкой
+                const serverAlive = await checkServer();
+                if (!serverAlive) {
+                  throw new Error('Server is not responding');
+                }
+                
                 console.log('Начало загрузки категорий...');
                 const menuButtons = document.querySelector('.menu-buttons');
                 menuButtons.innerHTML = '<p style="color: white;">Загрузка меню...</p>';
 
-                const response = await fetch(`${API_URL}/api/menu/categories`);
+                const response = await fetch(`${window.API_URL}/api/menu/categories`);
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
                 const categories = await response.json();
 
                 // Очищаем контейнер перед добавлением кнопок
@@ -812,7 +835,7 @@
                 } catch (error) {
                     console.error('Ошибка:', error);
                     document.getElementById('availableTables').innerHTML = 
-                        '<p style="color: white; text-align: center;">Ошибка при поиске столов</p>';
+                        '<p style="color: white; text-align: center;">Оши��ка при поиске столов</p>';
                 }
             });
         }
