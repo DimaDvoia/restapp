@@ -7,44 +7,16 @@ const WEBAPP_URL = 'http://localhost:3000';
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
+const webAppUrl = 'https://dimadvoia.github.io/restapp/';
+
 // Обработчик команды /start
-bot.onText(/\/start/, async (msg) => {
-    const chatId = msg.chat.id;
-    const firstName = msg.from.first_name;
-    
-    const keyboard = {
+bot.onText(/\/start/, (msg) => {
+    bot.sendMessage(msg.chat.id, 'Добро пожаловать!', {
         reply_markup: {
-            inline_keyboard: [[
-                {
-                    text: '🚀 Открыть приложение',
-                    web_app: { url: WEBAPP_URL }
-                }
-            ]],
-            keyboard: [[
-                {
-                    text: '📱 Поделиться номером телефона',
-                    request_contact: true
-                }
-            ]],
+            keyboard: [[{ text: 'Открыть приложение', web_app: { url: webAppUrl } }]],
             resize_keyboard: true
         }
-    };
-    
-    const welcomeMessage = `
-👋 Привет, ${firstName}!
-
-Я бот ресторана баранжар, который поможет тебе открыть наше мини-приложение. 
-Для полного доступа, пожалуйста, поделись своим номером телефона 📱
-
-💡 После этого ты сможешь:
-• Просматривать меню
-• Забронировать стол
-• Сделать заказ на вынос
-• Взаимодействовать с руководством 
-• И многое другое!
-    `;
-    
-    await bot.sendMessage(chatId, welcomeMessage, keyboard);
+    });
 });
 
 // Обработчик получения контакта

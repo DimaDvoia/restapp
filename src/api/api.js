@@ -1,5 +1,5 @@
 // Убедитесь, что URL берется из .env
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = window.API_URL;
 const tg = window.Telegram.WebApp;
 
 // Используйте этот URL для запросов
@@ -8,7 +8,7 @@ const getCategories = async () => {
     // Добавляем инициализацию Telegram WebApp
     tg.ready();
     
-    const response = await fetch(`${API_URL}/menu/categories`, {
+    const response = await fetch(`${API_URL}/api/menu/categories`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

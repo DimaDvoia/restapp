@@ -13,11 +13,13 @@
     "pg": "^8.13.1"
   },
   "scripts": {
-    "start": "pm2 start ecosystem.config.js",
+    "start": "node index.js",
     "stop": "pm2 stop all",
     "restart": "pm2 restart all",
     "logs": "pm2 logs",
-    "dev": "nodemon server.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"

@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        window.API_URL = 'https://restapp-api.onrender.com';
+        // Инициализация Telegram WebApp
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+    </script>
     <title>Telegram WebApp</title>
     <style>
         body {
@@ -559,7 +565,7 @@
                 
                 document.getElementById(screenId).classList.add('active');
                 
-                // Загружаем категории при открытии экрана меню
+                // Загружаем категории при открытии экрана мню
                 if (screenId === 'menuScreen') {
                     loadMenuCategories();
                 }
@@ -602,13 +608,19 @@
                 const menuButtons = document.querySelector('.menu-buttons');
                 menuButtons.innerHTML = '<p style="color: white;">Загрузка меню...</p>';
 
-                const apiUrl = 'http://localhost:3000';
-                const response = await fetch(`${apiUrl}/api/menu/categories`);
-                console.log('Статус ответа:', response.status);
-                console.log('URL запроса:', `${apiUrl}/api/menu/categories`);
+                const apiUrl = window.API_URL;
+                console.log('Используемый API URL:', apiUrl);
+                const response = await fetch(`${apiUrl}/api/menu/categories`, {
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
 
+                console.log('Статус ответа:', response.status);
                 if (!response.ok) {
-                    throw new Error('Ошибка загрузки категорий');
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const categories = await response.json();
@@ -617,7 +629,7 @@
                 menuButtons.innerHTML = '';
 
                 if (!categories || categories.length === 0) {
-                    menuButtons.innerHTML = '<p style="color: white;">Меню пока не оступно</p>';
+                    menuButtons.innerHTML = '<p style="color: white;">Меню пока еще не оступно</p>';
                     return;
                 }
 
@@ -638,7 +650,7 @@
         async function showMenuItems(categoryId) {
             try {
                 console.log('Загрузка блюд для категории:', categoryId);
-                const apiUrl = 'http://localhost:3000';
+                const apiUrl = window.API_URL;
                 const response = await fetch(`${apiUrl}/api/menu/items/${categoryId}`);
                 
                 if (!response.ok) {
@@ -725,7 +737,8 @@
                 };
                 
                 try {
-                    const response = await fetch(`http://localhost:3000/api/tables/available`, {
+                    const apiUrl = window.API_URL;
+                    const response = await fetch(`${apiUrl}/api/tables/available`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -761,7 +774,7 @@
                     <img src="${table.image_url}" alt="Стол ${table.number}" class="table-image">
                     <div class="table-info">
                         <h3>Стол ${table.number}</h3>
-                        <p>Этаж: ${table.stage}</p>
+                        <p>Эта: ${table.stage}</p>
                         <p>Вместимость: ${table.guests_number_min} - ${table.guests_number_max} гостей</p>
                         <button class="book-table-btn" onclick="bookTable(${table.id})">
                             Забронировать
