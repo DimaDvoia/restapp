@@ -3,7 +3,7 @@ require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const WEBAPP_URL = 'http://localhost:3000';
+const WEBAPP_URL = 'https://dimadvoia.github.io/restapp/';
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
@@ -41,7 +41,7 @@ bot.on('contact', async (msg) => {
         });
 
         if (response.ok) {
-            // Отправляем новое сообщение с кнопкой приложения
+            // Отправляем новое соо��щение с кнопкой приложения
             const newKeyboard = {
                 reply_markup: {
                     inline_keyboard: [[
