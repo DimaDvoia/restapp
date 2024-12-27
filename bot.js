@@ -3,6 +3,7 @@ require('dotenv').config();
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
+const API_URL = 'https://restapp-api.onrender.com';
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
@@ -40,7 +41,7 @@ bot.on('contact', async (msg) => {
         });
 
         if (response.ok) {
-            // Отправляем новое сообщение с кнопкой приложения
+            // Отправляем новое сообщение с кнопко�� приложения
             const newKeyboard = {
                 reply_markup: {
                     inline_keyboard: [[
