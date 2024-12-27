@@ -1,5 +1,5 @@
 // Убедитесь, что URL берется из .env
-const API_URL = window.API_URL;
+const API_URL = 'https://restapp-api.onrender.com';
 const tg = window.Telegram.WebApp;
 
 // Используйте этот URL для запросов
