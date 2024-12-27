@@ -6,6 +6,17 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         window.API_URL = 'https://restapp-api.onrender.com';
+        
+        // Логирование для отладки
+        console.log('WebApp Platform:', window.Telegram.WebApp.platform);
+        console.log('WebApp Version:', window.Telegram.WebApp.version);
+        
+        // Обработка ошибок WebApp
+        window.addEventListener('error', function(event) {
+          console.error('WebApp Error:', event.error);
+          window.Telegram.WebApp.showAlert('Error: ' + event.error.message);
+        });
+
         // Инициализация Telegram WebApp
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
@@ -387,7 +398,7 @@
             
             <div class="main-buttons">
                 <button class="main-button">🪑 Забронировать стол</button>
-                <button class="main-button">💎 Программа лоялости</button>
+                <button class="main-button">💎 Прог��амма лоялости</button>
                 <button class="main-button">💰 Чаевые</button>
             </div>
         </div>
@@ -609,7 +620,16 @@
                 menuButtons.innerHTML = '<p style="color: white;">Загрузка меню...</p>';
 
                 const apiUrl = window.API_URL;
-                console.log('Используемый API URL:', apiUrl);
+                console.log('Используемы�� API URL:', apiUrl);
+                
+                // Проверяем доступность API
+                try {
+                    await fetch(apiUrl, { method: 'HEAD' });
+                } catch (error) {
+                    console.error('API недоступен:', error);
+                    throw new Error('API сервер недоступен');
+                }
+
                 const response = await fetch(`${apiUrl}/api/menu/categories`, {
                     mode: 'cors',
                     headers: {
