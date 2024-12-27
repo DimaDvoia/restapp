@@ -46,7 +46,7 @@ bot.on('contact', async (msg) => {
                     inline_keyboard: [[
                         {
                             text: '🚀 Открыть приложение',
-                            web_app: { url: WEBAPP_URL }
+                            web_app: { url: 'https://dimadvoia.github.io/restapp/' }
                         }
                     ]],
                     remove_keyboard: true
