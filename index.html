@@ -495,7 +495,7 @@
         <img src="assets/logo.png" alt="Logo" class="header-logo">
         <div class="content-container">
             <div class="welcome-text">Информация</div>
-            <!-- Здесь будет информационный контент -->
+            <!-- Здесь будет информ��ционный контент -->
         </div>
     </div>
 
@@ -524,7 +524,7 @@
                 <div class="form-group">
                     <label>Повод для посещения</label>
                     <select id="occasion" required>
-                        <option value="">Выберите ��овод</option>
+                        <option value="">Выберите повод</option>
                         <option value="dinner">Ужин</option>
                         <option value="birthday">День рождения</option>
                         <option value="anniversary">Годовщина</option>
@@ -644,7 +644,7 @@
         // Создаем хинкали каждые 500мс
         setInterval(createKhinkali, 500);
 
-        // Функция для переключения экранов
+        // Функция для переключения эк��анов
         function showScreen(screenId) {
             try {
                 document.querySelectorAll('.screen').forEach(screen => {
@@ -677,7 +677,7 @@
             });
         });
 
-        // Получаем и устанавливаем имя пользователя при загрузке
+        // Получаем и устанавлива��м имя пользователя при загрузке
         function setUserName() {
             try {
                 if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
@@ -692,15 +692,19 @@
 
         async function loadMenuCategories() {
             try {
-                // Проверяем сервер перед загрузкой
-                const serverAlive = await checkServer();
-                if (!serverAlive) {
-                  throw new Error('Server is not responding');
-                }
-                
                 console.log('Начало загрузки категорий...');
                 const menuButtons = document.querySelector('.menu-buttons');
                 menuButtons.innerHTML = '<p style="color: white;">Загрузка меню...</p>';
+
+                // Пробуем "разбудить" сервер
+                try {
+                    await fetch(`${window.API_URL}/ping`);
+                    console.log('Server awakened');
+                } catch (e) {
+                    console.log('Waking up server...');
+                    // Ждем 5 секунд
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                }
 
                 const response = await fetch(`${window.API_URL}/api/menu/categories`);
                 console.log('Response status:', response.status);
@@ -835,7 +839,7 @@
                 } catch (error) {
                     console.error('Ошибка:', error);
                     document.getElementById('availableTables').innerHTML = 
-                        '<p style="color: white; text-align: center;">Оши��ка при поиске столов</p>';
+                        '<p style="color: white; text-align: center;">Ошибка при поиске столов</p>';
                 }
             });
         }
