@@ -57,7 +57,7 @@
             document.getElementById('error').textContent = 'API работает: ' + JSON.stringify(data);
           } catch (error) {
             console.error('API Test Error:', error);
-            document.getElementById('error').textContent = 'Ошиб��а API: ' + error.message;
+            document.getElementById('error').textContent = 'Ошибка API: ' + error.message;
           }
         }
         
@@ -691,46 +691,37 @@
             }
         }
 
+        // Инициализация приложения
+        console.log('Приложение загружено'); 
+        
         async function loadMenuCategories() {
             try {
-                console.log('Начало заг��узки категорий...');
+                console.log('Начало загрузки категорий...');
                 const menuButtons = document.querySelector('.menu-buttons');
                 menuButtons.innerHTML = '<p style="color: white;">Загрузка меню...</p>';
-
+                
+                const API_URL = 'https://restapp-api.onrender.com';
+                console.log('Using API URL:', API_URL);
+                
                 const response = await fetch(`${API_URL}/api/menu/categories`);
-
-                console.log('Fetch response:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: Object.fromEntries(response.headers),
-                    url: response.url
-                });
-
+                console.log('Response:', response);
+                
                 if (!response.ok) {
-                    console.error('Response not OK:', response);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                const categories = await response.json();
-                console.log('Parsed categories:', categories);
-
-                // Очищаем контейнер перед добавлением кнопок
-                menuButtons.innerHTML = '';
                 
-                // Проверяем, что categories это массив
-                if (Array.isArray(categories)) {
-                    categories.forEach(category => {
-                        const button = document.createElement('button');
-                        button.className = 'menu-button';
-                        button.onclick = () => showMenuItems(category.id);
-                        button.innerHTML = `${category.icon} ${category.name}`;
-                        menuButtons.appendChild(button);
-                    });
-                } else {
-                    throw new Error('Неверный формат данных');
-                }
+                const categories = await response.json();
+                console.log('Categories:', categories);
+                
+                menuButtons.innerHTML = '';
+                categories.forEach(category => {
+                    const button = document.createElement('button');
+                    button.className = 'menu-button';
+                    button.innerHTML = `${category.icon} ${category.name}`;
+                    menuButtons.appendChild(button);
+                });
             } catch (error) {
-                console.error('Ошибка загрузки категорий:', error);
+                console.error('Error:', error);
                 const menuButtons = document.querySelector('.menu-buttons');
                 menuButtons.innerHTML = `<p style="color: white;">Ошибка загрузки меню: ${error.message}</p>`;
             }
